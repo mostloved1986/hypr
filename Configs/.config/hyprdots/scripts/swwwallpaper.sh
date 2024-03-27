@@ -20,7 +20,9 @@ Wall_Update()
     local x_wall="$1"
     local x_update="${x_wall/$HOME/"~"}"
     cacheImg=$(basename "$x_wall")
-    $ScrDir/swwwallbash.sh "$x_wall" &
+    ln -fs "${x_wall}" "${wallSet}"
+    ln -fs "${cacheDir}/${curTheme}/${cacheImg}.dcol" "${wallDcl}"
+    $ScrDir/swwwallbash.sh &
 
     if [ ! -f "${cacheDir}/${curTheme}/${cacheImg}" ] ; then
         convert -strip "${x_wall}"[0] -thumbnail 500x500^ -gravity center -extent 500x500 "${cacheDir}/${curTheme}/${cacheImg}" &
@@ -36,10 +38,8 @@ Wall_Update()
 
     wait
     awk -F '|' -v thm="${curTheme}" -v wal="${x_update}" '{OFS=FS} {if($2==thm)$NF=wal;print$0}' "${ThemeCtl}" > "${ScrDir}/tmp" && mv "${ScrDir}/tmp" "${ThemeCtl}"
-    ln -fs "${x_wall}" "${wallSet}"
     ln -fs "${cacheDir}/${curTheme}/${cacheImg}" "${wallTmb}"
     ln -fs "${cacheDir}/${curTheme}/${cacheImg}.blur" "${wallBlr}"
-    ln -fs "${cacheDir}/${curTheme}/${cacheImg}.dcol" "${wallDcl}"
     ln -fs "${cacheDir}/${curTheme}/${cacheImg}.rofi" "${wallRfi}"
 }
 
@@ -76,8 +76,7 @@ Wall_Set()
     --transition-duration 0.7 \
     --transition-fps 60 \
     --invert-y \
-    --transition-pos "$( hyprctl cursorpos )"    
-
+    --transition-pos "$( hyprctl cursorpos )"
 }
 
 
@@ -141,8 +140,22 @@ done
 # check swww daemon and set wall
 
 swww query
-if [ $? -eq 1 ] ; then
+if [ $? -ne 0 ] ; then
     swww-daemon --format xrgb &
+    sleep 1
+    swww query
+    if [ $? -ne 0 ] ; then
+        swww clear-cache
+        swww clear 
+        swww init
+        sleep 1
+        swww query
+        if [ $? -ne 0 ] ; then
+            swww clear-cache
+            swww clear 
+            swww-daemon --format xrgb &
+        fi
+    fi
 fi
 
 Wall_Set

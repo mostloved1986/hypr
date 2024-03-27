@@ -4,20 +4,20 @@
 # set variables
 ScrDir=`dirname "$(realpath "$0")"`
 source "${ScrDir}/globalcontrol.sh"
-readarray -t theme_ctl < <( cut -d '|' -f 2 $ThemeCtl )
+readarray -t theme_ctl < <( cut -d '|' -f 2 "${ThemeCtl}" )
 
 
 # define functions
 Theme_Change()
 {
     local x_switch=$1
-    local curTheme=$(awk -F '|' '$1 == 1 {print $2}' $ThemeCtl)
+    local curTheme=$(awk -F '|' '$1 == 1 {print $2}' "${ThemeCtl}")
     for (( i=0 ; i<${#theme_ctl[@]} ; i++ ))
     do
         if [ "${theme_ctl[i]}" == "${curTheme}" ] ; then
-            if [ $x_switch == 'n' ] ; then
+            if [ "${x_switch}" == 'n' ] ; then
                 nextIndex=$(( (i + 1) % ${#theme_ctl[@]} ))
-            elif [ $x_switch == 'p' ] ; then
+            elif [ "${x_switch}" == 'p' ] ; then
                 nextIndex=$(( i - 1 ))
             fi
             ThemeSet="${theme_ctl[nextIndex]}"
@@ -28,7 +28,7 @@ Theme_Change()
 
 
 # evaluate options
-while getopts "nps:t" option ; do
+while getopts "nps:" option ; do
     case $option in
 
     n ) # set next theme
@@ -42,26 +42,20 @@ while getopts "nps:t" option ; do
     s ) # set selected theme
         ThemeSet="$OPTARG" ;;
 
-    t ) # display tooltip
-        echo ""
-        echo "󰆊 Next/Previous Theme"
-        exit 0 ;;
-
     * ) # invalid option
         echo "n : set next theme"
         echo "p : set previous theme"
         echo "s : set theme from parameter"
-        echo "t : display tooltip"
         exit 1 ;;
     esac
 done
 
 
 # update theme control
-if [ `cat "$ThemeCtl" | awk -F '|' -v thm=$ThemeSet '{if($2==thm) print$2}' | wc -w` -ne 1 ] ; then
+if [ `cat "${ThemeCtl}" | awk -F '|' -v thm=$ThemeSet '{if($2==thm) print$2}' | wc -w` -ne 1 ] ; then
     echo "Unknown theme selected: $ThemeSet"
     echo "Available themes are:"
-    cat "$ThemeCtl" | cut -d '|' -f 2
+    cat "${ThemeCtl}" | cut -d '|' -f 2
     exit 1
 else
     echo "Selected theme: $ThemeSet"
@@ -71,7 +65,8 @@ fi
 
 
 # hyprland
-ln -fs $ConfDir/hypr/themes/${ThemeSet}.conf $ConfDir/hypr/themes/theme.conf
+#ln -fs $ConfDir/hypr/themes/${ThemeSet}.conf $ConfDir/hypr/themes/theme.conf
+ln -fs "${WallbashDir}/${ThemeSet}/hypr.conf" "${ConfDir}/hypr/themes/theme.conf"
 hyprctl reload
 source "${ScrDir}/globalcontrol.sh"
 
@@ -87,21 +82,24 @@ if [ ! -z "$(grep '^1|' "$ThemeCtl" | awk -F '|' '{print $3}')" ] ; then
 fi
 
 
+# qtct
+sed -i "/^icon_theme=/c\icon_theme=${gtkIcon}" "${ConfDir}/qt5ct/qt5ct.conf"
+sed -i "/^icon_theme=/c\icon_theme=${gtkIcon}" "${ConfDir}/qt6ct/qt6ct.conf"
+
+
 # gtk3
 sed -i "/^gtk-theme-name=/c\gtk-theme-name=${ThemeSet}" $ConfDir/gtk-3.0/settings.ini
 sed -i "/^gtk-icon-theme-name=/c\gtk-icon-theme-name=${gtkIcon}" $ConfDir/gtk-3.0/settings.ini
 
 
 # gtk4
-
 if [ -d /run/current-system/sw/share/themes ]; then
     themeDir=/run/current-system/sw/share/themes
 else
     themeDir=/usr/share/themes
 fi
-
-rm -fr $ConfDir/gtk-4.0
-ln -s $themeDir/$ThemeSet/gtk-4.0 $ConfDir/gtk-4.0
+rm -rf "${ConfDir}/gtk-4.0"
+ln -s "${themeDir}/${ThemeSet}/gtk-4.0" "${ConfDir}/gtk-4.0"
 
 
 # flatpak GTK
