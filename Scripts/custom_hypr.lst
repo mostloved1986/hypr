@@ -9,8 +9,10 @@ wireplumber                                            # pipewire session manage
 pavucontrol                                            # pulseaudio volume control
 pamixer                                                # pulseaudio cli mixer
 network-manager-applet                                 # network manager system tray utility
+bluez                                                  # bluetooth protocol stack
+bluez-utils                                            # bluetooth utility cli
+blueman                                                # bluetooth manager gui
 brightnessctl                                          # screen brightness control
-
 
 # --------------------------------------------------- // Display Manager
 sddm                                                   # display manager for KDE plasma
@@ -29,7 +31,6 @@ slurp                                                  # region select for scree
 swappy                                                 # screenshot editor
 cliphist                                               # clipboard manager
 
-
 # --------------------------------------------------- // Dependencies
 polkit-kde-agent                                       # authentication agent
 xdg-desktop-portal-hyprland                            # xdg desktop portal for hyprland
@@ -41,7 +42,6 @@ imagemagick                                            # for image processing
 qt6-imageformats                                       # for dolphin image thumbnails
 ffmpegthumbs                                           # for dolphin video thumbnails
 kde-cli-tools                                          # for dolphin file type defaults
-
 
 # --------------------------------------------------- // Theming
 nwg-look                                               # gtk configuration tool
@@ -61,14 +61,15 @@ btop                                                   # system monitor
 spotify                                                # spotify
 spicetify-cli                                          # theme for spotify
 cava                                                   # cava
-steam
-tmux
-ranger
+steam                                                  # steam
+tmux                                                   # tmux
+ranger                                                 # ranger
 
 # --------------------------------------------------- // Shell
 lsd|fish                                               # file lister for fish
 starship|fish                                          # customizable shell prompt
 neofetch                                               # fetch tool
+
 # --------------------------------------------------- // Hyprdots
 hyprdots-ctl-git                                           # cli tool to manage hyprdots
 
